@@ -1,18 +1,24 @@
-import unittest
 import os
 import subprocess
 import sys
+import unittest
 
-from langgraph_agent_demo.demo import build_agent_graph, run_demo
+from langgraph_agent_demo.demo import run_demo
+from langgraph_agent_demo.graph import build_agent_graph
 
 
 class LangGraphAgentDemoTest(unittest.TestCase):
-    def test_agent_graph_adds_mock_ai_response(self):
+    def test_agent_graph_runs_multi_agent_runtime(self):
         result = run_demo("你好，LangGraph")
 
-        self.assertEqual(result["reply"], "hello world")
-        self.assertEqual(result["trace"], ["START", "mock_llm", "END"])
-        self.assertEqual(result["messages"][-1].content, "hello world")
+        self.assertIn("Result", result["reply"])
+        self.assertEqual(result["trace"][0], "START")
+        self.assertEqual(result["trace"][-1], "END")
+        self.assertIn("supervisor", result["trace"])
+        self.assertIn("planner", result["trace"])
+        self.assertIn("executor", result["trace"])
+        self.assertIn("reviewer", result["trace"])
+        self.assertEqual(result["state"]["status"], "approved")
 
     def test_build_agent_graph_returns_compiled_graph(self):
         graph = build_agent_graph()
@@ -31,7 +37,7 @@ class LangGraphAgentDemoTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", errors="replace"))
-        self.assertIn("最终回复: hello world", result.stdout.decode("utf-8"))
+        self.assertIn("最终回复:", result.stdout.decode("utf-8"))
 
 
 if __name__ == "__main__":
