@@ -11,7 +11,7 @@ class LangGraphAgentDemoTest(unittest.TestCase):
     """验证公开 demo API 和 CLI 仍然可用。"""
 
     def test_agent_graph_runs_multi_agent_runtime(self):
-        """`run_demo` 应返回 multi-agent trace、最终回复和 approved 状态。"""
+        """`run_demo` 应返回主任务结果和受控自进化结果。"""
 
         result = run_demo("你好，LangGraph")
 
@@ -23,6 +23,11 @@ class LangGraphAgentDemoTest(unittest.TestCase):
         self.assertIn("executor", result["trace"])
         self.assertIn("reviewer", result["trace"])
         self.assertEqual(result["state"]["status"], "approved")
+        self.assertIn("evaluation", result["evolution"])
+        self.assertIn("reflection", result["evolution"])
+        self.assertIn("proposal", result["evolution"])
+        self.assertTrue(result["evolution"]["proposal"]["requires_human_approval"])
+        self.assertFalse(result["evolution"]["proposal"]["applied"])
 
     def test_build_agent_graph_returns_compiled_graph(self):
         """公开 graph 构建函数应返回可 invoke 的 LangGraph runnable。"""
