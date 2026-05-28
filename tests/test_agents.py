@@ -7,7 +7,11 @@ from langgraph_agent_demo.tools import build_default_tools
 
 
 class AgentStateTest(unittest.TestCase):
+    """验证共享状态初始化是否满足 graph 节点的最小输入要求。"""
+
     def test_make_initial_state_sets_defaults(self):
+        """初始状态必须包含任务、空结果、默认路由和安全循环上限。"""
+
         state = make_initial_state("Build a report")
 
         self.assertEqual(state["task"], "Build a report")
@@ -24,7 +28,11 @@ class AgentStateTest(unittest.TestCase):
 
 
 class RoleAgentTest(unittest.TestCase):
+    """验证每个角色 agent 只写入自己负责的状态字段。"""
+
     def test_planner_writes_plan_and_trace(self):
+        """Planner 应生成非空计划，并把简单任务路由到 executor。"""
+
         state = make_initial_state("Build a report")
 
         update = planner(state, model=MockModelClient())
@@ -34,6 +42,8 @@ class RoleAgentTest(unittest.TestCase):
         self.assertIn("planner", update["trace"])
 
     def test_planner_can_request_research(self):
+        """Planner 遇到 research 任务时应显式请求 researcher。"""
+
         state = make_initial_state("Research LangGraph and summarize it")
 
         update = planner(state, model=MockModelClient())
@@ -42,6 +52,8 @@ class RoleAgentTest(unittest.TestCase):
         self.assertEqual(update["next_agent"], "researcher")
 
     def test_researcher_writes_findings(self):
+        """Researcher 应写入 findings，并把任务交回 executor。"""
+
         state = make_initial_state("Research LangGraph")
         state["needs_research"] = True
 
@@ -52,6 +64,8 @@ class RoleAgentTest(unittest.TestCase):
         self.assertIn("researcher", update["trace"])
 
     def test_executor_writes_result(self):
+        """Executor 应生成候选结果，并把下一跳设置为 reviewer。"""
+
         state = make_initial_state("Build a report")
         state["plan"] = ["Produce a concise answer"]
 
@@ -62,6 +76,8 @@ class RoleAgentTest(unittest.TestCase):
         self.assertIn("executor", update["trace"])
 
     def test_reviewer_approves_non_empty_result(self):
+        """Reviewer 应批准非空结果，并把 graph 标记为可结束。"""
+
         state = make_initial_state("Build a report")
         state["result"] = "A completed result"
 

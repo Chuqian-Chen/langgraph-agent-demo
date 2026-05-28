@@ -8,7 +8,11 @@ from langgraph_agent_demo.graph import build_agent_graph
 
 
 class LangGraphAgentDemoTest(unittest.TestCase):
+    """验证公开 demo API 和 CLI 仍然可用。"""
+
     def test_agent_graph_runs_multi_agent_runtime(self):
+        """`run_demo` 应返回 multi-agent trace、最终回复和 approved 状态。"""
+
         result = run_demo("你好，LangGraph")
 
         self.assertIn("Result", result["reply"])
@@ -21,11 +25,15 @@ class LangGraphAgentDemoTest(unittest.TestCase):
         self.assertEqual(result["state"]["status"], "approved")
 
     def test_build_agent_graph_returns_compiled_graph(self):
+        """公开 graph 构建函数应返回可 invoke 的 LangGraph runnable。"""
+
         graph = build_agent_graph()
 
         self.assertTrue(hasattr(graph, "invoke"))
 
     def test_cli_prints_chinese_when_stdout_encoding_is_narrow(self):
+        """CLI 在窄 stdout 编码下仍应强制输出 UTF-8 中文。"""
+
         env = os.environ.copy()
         env["PYTHONIOENCODING"] = "cp1252"
 
