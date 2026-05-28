@@ -26,6 +26,20 @@ def main() -> None:
     print(f"  - status: {state['status']}")
     print(f"  - review: {state['review']}")
     print(f"最终回复: {result['reply']}")
+    evolution = result["evolution"]
+    evaluation = evolution["evaluation"]
+    reflection = evolution["reflection"]
+    proposal = evolution["proposal"]
+    print("受控自进化:")
+    print(f"  - evaluation score: {evaluation['score']}")
+    print(f"  - evaluation passed: {evaluation['passed']}")
+    print(f"  - strengths: {reflection['strengths']}")
+    print(f"  - weaknesses: {reflection['weaknesses']}")
+    print(f"  - proposal title: {proposal['title']}")
+    print(f"  - proposal target: {proposal['target']}")
+    print(f"  - proposal change: {proposal['change']}")
+    print(f"  - requires_human_approval: {proposal['requires_human_approval']}")
+    print(f"  - applied: {proposal['applied']}")
 
 
 if __name__ == "__main__":

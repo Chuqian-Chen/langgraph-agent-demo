@@ -74,6 +74,31 @@ multi-agent runtime 共享一个状态对象，主要字段包括：
 - `status`：运行状态。
 - `errors`：结构化错误列表。
 
+## 受控自进化
+
+demo 在主任务 graph 结束后会运行一个确定性的 meta layer：
+
+```text
+Task Graph
+  -> Evaluation
+  -> Reflection
+  -> ImprovementProposal
+  -> human approval required
+```
+
+这个阶段只读取最终 `AgentState`，然后生成：
+
+- `evaluation`：分数、是否通过、质量信号。
+- `reflection`：优势、弱点、可能根因。
+- `proposal`：需要人工审批的改进建议。
+
+第一版受控自进化不会自动修改代码、prompt 或配置。所有提案都会显式标记：
+
+```text
+requires_human_approval: True
+applied: False
+```
+
 ## 运行方式
 
 进入项目目录：
@@ -129,6 +154,16 @@ LangGraph Multi-Agent Demo
   - status: approved
   - review: {'approved': True, 'score': 1.0, 'issues': []}
 最终回复: Result: completed response for 你好，LangGraph
+受控自进化:
+  - evaluation score: 0.95
+  - evaluation passed: True
+  - strengths: [...]
+  - weaknesses: [...]
+  - proposal title: 增加真实任务质量评估信号
+  - proposal target: prompt
+  - proposal change: 后续接入真实模型后，补充面向准确性、完整性和工具使用质量的 eval prompt。
+  - requires_human_approval: True
+  - applied: False
 ```
 
 ## 设计文档
@@ -147,5 +182,5 @@ docs/superpowers/plans/2026-05-26-multi-agent-runtime.md
 - 接入真实 LLM provider。
 - 增加真实工具，例如搜索、文件读取、代码执行。
 - 接 LangGraph checkpoint，支持恢复和持久运行。
-- 增加 Eval、Reflection、ImprovementProposal 形成受控自进化闭环。
+- 把当前 deterministic meta layer 升级为可插拔 Eval、Reflection、ImprovementProposal 流程。
 - 在关键改进点加入人工审批。

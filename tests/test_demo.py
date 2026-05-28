@@ -37,7 +37,7 @@ class LangGraphAgentDemoTest(unittest.TestCase):
         self.assertTrue(hasattr(graph, "invoke"))
 
     def test_cli_prints_chinese_when_stdout_encoding_is_narrow(self):
-        """CLI 在窄 stdout 编码下仍应强制输出 UTF-8 中文。"""
+        """CLI 在窄 stdout 编码下仍应输出中文和受控自进化状态。"""
 
         env = os.environ.copy()
         env["PYTHONIOENCODING"] = "cp1252"
@@ -50,7 +50,11 @@ class LangGraphAgentDemoTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", errors="replace"))
-        self.assertIn("最终回复:", result.stdout.decode("utf-8"))
+        stdout = result.stdout.decode("utf-8")
+        self.assertIn("最终回复:", stdout)
+        self.assertIn("受控自进化", stdout)
+        self.assertIn("requires_human_approval: True", stdout)
+        self.assertIn("applied: False", stdout)
 
 
 if __name__ == "__main__":
